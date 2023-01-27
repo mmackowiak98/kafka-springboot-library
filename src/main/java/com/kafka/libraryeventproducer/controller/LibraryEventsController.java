@@ -25,7 +25,7 @@ public class LibraryEventsController implements LibraryOperation {
     LibraryEventProducer libraryEventProducer;
 
     @Override
-    public ResponseEntity<LibraryEvent> addBook(@RequestBody @Valid LibraryEvent libraryEvent) throws JsonProcessingException {
+    public ResponseEntity<LibraryEvent> postLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
         libraryEvent.setType(LibraryEventType.NEW);
         //Depends on client requirements -> Return something after messaging - Synchronous, otherwise - Asynchronous
         libraryEventProducer.sendLibraryEvent(libraryEvent);
@@ -36,7 +36,14 @@ public class LibraryEventsController implements LibraryOperation {
     }
 
     @Override
-    public BookDTO updateBook(Book book) {
-        return null;
+    public ResponseEntity<LibraryEvent> updateLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
+        if(libraryEvent.getEventId()==null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(libraryEvent);
+        }
+        libraryEvent.setType(LibraryEventType.UPDATE);
+        libraryEventProducer.sendLibraryEventApproach3(libraryEvent);
+
+        return ResponseEntity.status(HttpStatus.OK).body(libraryEvent);
     }
+
 }

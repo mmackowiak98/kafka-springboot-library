@@ -35,7 +35,7 @@ public class LibraryEventProducerUnitTest {
     LibraryEventProducer libraryEventProducer;
 
     @Test
-    void sendLibraryEvent_AsynchronousMethod_onFailure_throwsException() throws JsonProcessingException, ExecutionException, InterruptedException {
+    void sendLibraryEvent_AsynchronousMethod_onFailure_throwsException() {
 
         Book book = Book.builder()
                 .bookId(1)
@@ -54,7 +54,7 @@ public class LibraryEventProducerUnitTest {
 
         when(kafkaTemplate.send(isA(ProducerRecord.class))).thenReturn(completableFuture);
 
-        Assertions.assertThrows(Exception.class, () -> libraryEventProducer.sendLibraryEventApproach3(libraryEvent).get());
+        Assertions.assertThrows(Exception.class, () -> libraryEventProducer.sendLibraryEventApproach3(libraryEvent));
     }
 
     @Test
