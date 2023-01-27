@@ -26,14 +26,14 @@ public class LibraryEventProducer {
     private final ObjectMapper objectMapper;
 
     //Asynchronous way
-    public void sendLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
+    public CompletableFuture<SendResult<Integer, String>> sendLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
 
         String value = objectMapper.writeValueAsString(libraryEvent);
 
         CompletableFuture<SendResult<Integer, String>> completableFuture =
                 kafkaTemplate.sendDefault(libraryEvent.getEventId(), value);
 
-        completableFuture.whenComplete((result, ex) -> {
+        return completableFuture.whenComplete((result, ex) -> {
             if (ex != null) {
                 handleFailure(ex);
             } else {
@@ -60,7 +60,7 @@ public class LibraryEventProducer {
     }
 
     //Explicitly providing topic to send message to with use of ProducerRecord
-    public void sendLibraryEventApproach3(LibraryEvent libraryEvent) throws JsonProcessingException {
+    public CompletableFuture<SendResult<Integer, String>> sendLibraryEventApproach3(LibraryEvent libraryEvent) throws JsonProcessingException {
 
         String value = objectMapper.writeValueAsString(libraryEvent);
 
@@ -68,7 +68,7 @@ public class LibraryEventProducer {
         CompletableFuture<SendResult<Integer, String>> completableFuture =
                 kafkaTemplate.send(producerRecord);
 
-        completableFuture.whenComplete((result, ex) -> {
+        return completableFuture.whenComplete((result, ex) -> {
             if (ex != null) {
                 handleFailure(ex);
             } else {
@@ -79,6 +79,7 @@ public class LibraryEventProducer {
                 }
             }
         });
+
     }
 
     private ProducerRecord<Integer, String> buildProducerRecord(Integer key, String value, String topic) {
@@ -86,7 +87,7 @@ public class LibraryEventProducer {
         //META-DATA of Message
         List<RecordHeader> recordHeaders = List.of(new RecordHeader("event-source", "scanner".getBytes()));
 
-        return new ProducerRecord(topic,null, key, value, recordHeaders);
+        return new ProducerRecord(topic, null, key, value, recordHeaders);
     }
 
     private void handleSuccess(Integer key, String value, SendResult<Integer, String> result) throws JsonProcessingException {

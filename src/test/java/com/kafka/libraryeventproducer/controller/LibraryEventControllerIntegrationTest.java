@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.libraryeventproducer.domain.Book;
 import com.kafka.libraryeventproducer.domain.LibraryEvent;
-import com.kafka.libraryeventproducer.domain.LibraryEventType;
+import com.kafka.libraryeventproducer.domain.enums.LibraryEventType;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.IntegerDeserializer;

@@ -3,10 +3,11 @@ package com.kafka.libraryeventproducer.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kafka.libraryeventproducer.domain.Book;
 import com.kafka.libraryeventproducer.domain.LibraryEvent;
-import com.kafka.libraryeventproducer.domain.LibraryEventType;
+import com.kafka.libraryeventproducer.domain.enums.LibraryEventType;
 import com.kafka.libraryeventproducer.domain.dto.BookDTO;
 import com.kafka.libraryeventproducer.operations.LibraryOperation;
 import com.kafka.libraryeventproducer.producer.LibraryEventProducer;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,12 +25,12 @@ public class LibraryEventsController implements LibraryOperation {
     LibraryEventProducer libraryEventProducer;
 
     @Override
-    public ResponseEntity<LibraryEvent> addBook(@RequestBody LibraryEvent libraryEvent) throws JsonProcessingException {
+    public ResponseEntity<LibraryEvent> addBook(@RequestBody @Valid LibraryEvent libraryEvent) throws JsonProcessingException {
         libraryEvent.setType(LibraryEventType.NEW);
         //Depends on client requirements -> Return something after messaging - Synchronous, otherwise - Asynchronous
-//        libraryEventProducer.sendLibraryEvent(libraryEvent);
+        libraryEventProducer.sendLibraryEvent(libraryEvent);
 //        SendResult<Integer, String> sendResult = libraryEventProducer.sendLibraryEventSynchronous(libraryEvent);
-        libraryEventProducer.sendLibraryEventApproach3(libraryEvent);
+//        libraryEventProducer.sendLibraryEventApproach3(libraryEvent);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(libraryEvent);
     }
