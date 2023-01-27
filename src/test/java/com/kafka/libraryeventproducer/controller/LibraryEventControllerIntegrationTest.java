@@ -27,7 +27,7 @@ import java.util.HashMap;
 @EmbeddedKafka(topics = {"library-events"}, partitions = 3)
 @TestPropertySource(properties = {"spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
         "spring.kafka.admin.properties.bootstrap.servers=${spring.embedded.kafka.brokers}"})
-public class LibraryEventControllerIntegrationTest {
+class LibraryEventControllerIntegrationTest {
 
     @Autowired
     TestRestTemplate testRestTemplate;
