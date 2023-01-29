@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Book {
     @NotNull
-    private int bookId;
+    private Integer bookId;
     @NotBlank
     private String bookName;
     @NotBlank

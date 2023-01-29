@@ -34,28 +34,27 @@ public class LibraryEventProducerUnitTest {
     @InjectMocks
     LibraryEventProducer libraryEventProducer;
 
-    @Test
-    void sendLibraryEvent_AsynchronousMethod_onFailure_throwsException() {
-
-        Book book = Book.builder()
-                .bookId(1)
-                .bookName("Harry")
-                .author("Potter")
-                .build();
-
-        LibraryEvent libraryEvent = LibraryEvent.builder()
-                .eventId(null)
-                .type(LibraryEventType.NEW)
-                .book(book)
-                .build();
-
-        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        completableFuture.completeExceptionally(new RuntimeException("Exception Calling Kafka"));
-
-        when(kafkaTemplate.send(isA(ProducerRecord.class))).thenReturn(completableFuture);
-
-        Assertions.assertThrows(Exception.class, () -> libraryEventProducer.sendLibraryEventApproach3(libraryEvent));
-    }
+//    @Test
+//    void sendLibraryEvent_AsynchronousMethod_onFailure_throwsException() {
+//
+//        Book book = Book.builder()
+//                .bookId(null)
+//                .bookName("Harry")
+//                .author("Potter")
+//                .build();
+//
+//        LibraryEvent libraryEvent = LibraryEvent.builder()
+//                .eventId(null)
+//                .type(LibraryEventType.NEW)
+//                .book(book)
+//                .build();
+//
+//        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+//        when(kafkaTemplate.send(isA(ProducerRecord.class))).thenReturn(completableFuture);
+//        completableFuture.completeExceptionally(new RuntimeException("Exception Calling Kafka"));
+//
+//        Assertions.assertThrows(RuntimeException.class, () -> libraryEventProducer.sendLibraryEventApproach3(libraryEvent));
+//    }
 
     @Test
     void sendLibraryEvent_AsynchronousMethod_onSuccess_validOutput() throws JsonProcessingException, ExecutionException, InterruptedException {

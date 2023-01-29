@@ -3,10 +3,13 @@ package com.kafka.libraryeventproducer.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.libraryeventproducer.domain.LibraryEvent;
+import com.kafka.libraryeventproducer.exception.GlobalException;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -20,12 +23,13 @@ import java.util.concurrent.TimeoutException;
 @Component
 @Slf4j
 @AllArgsConstructor
-public class LibraryEventProducer {
+public class LibraryEventProducer implements LibraryEventProducerOperation {
 
     private KafkaTemplate<Integer, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
     //Asynchronous way
+    @Override
     public CompletableFuture<SendResult<Integer, String>> sendLibraryEvent(LibraryEvent libraryEvent) throws JsonProcessingException {
 
         String value = objectMapper.writeValueAsString(libraryEvent);
@@ -33,20 +37,11 @@ public class LibraryEventProducer {
         CompletableFuture<SendResult<Integer, String>> completableFuture =
                 kafkaTemplate.sendDefault(libraryEvent.getEventId(), value);
 
-        return completableFuture.whenComplete((result, ex) -> {
-            if (ex != null) {
-                handleFailure(ex);
-            } else {
-                try {
-                    handleSuccess(libraryEvent.getEventId(), value, result);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        return getSendResult(libraryEvent, value, completableFuture);
     }
 
     //Synchronous way
+    @Override
     public SendResult<Integer, String> sendLibraryEventSynchronous(LibraryEvent libraryEvent) throws JsonProcessingException {
         String value = objectMapper.writeValueAsString(libraryEvent);
         SendResult<Integer, String> sendResult = null;
@@ -60,6 +55,7 @@ public class LibraryEventProducer {
     }
 
     //Explicitly providing topic to send message to with use of ProducerRecord
+    @Override
     public CompletableFuture<SendResult<Integer, String>> sendLibraryEventApproach3(LibraryEvent libraryEvent) throws JsonProcessingException {
 
         String value = objectMapper.writeValueAsString(libraryEvent);
@@ -68,6 +64,14 @@ public class LibraryEventProducer {
         CompletableFuture<SendResult<Integer, String>> completableFuture =
                 kafkaTemplate.send(producerRecord);
 
+        return getSendResult(libraryEvent, value, completableFuture);
+
+    }
+
+    private CompletableFuture<SendResult<Integer, String>> getSendResult(
+            LibraryEvent libraryEvent,
+            String value,
+            CompletableFuture<SendResult<Integer, String>> completableFuture) {
         return completableFuture.whenComplete((result, ex) -> {
             if (ex != null) {
                 handleFailure(ex);
@@ -79,7 +83,6 @@ public class LibraryEventProducer {
                 }
             }
         });
-
     }
 
     private ProducerRecord<Integer, String> buildProducerRecord(Integer key, String value, String topic) {
@@ -97,12 +100,13 @@ public class LibraryEventProducer {
                 result.getRecordMetadata().partition());
     }
 
+
     private void handleFailure(Throwable ex) {
         log.error("Error has occured {}, with message {}", ex.getCause(), ex.getMessage());
         try {
-            throw ex;
-        } catch (Throwable e) {
-            log.error("Error in handleFailure method {}", e.getMessage());
+            throw new Exception();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
